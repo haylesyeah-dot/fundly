@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import json
+from urllib.parse import quote
 
 st.set_page_config(page_title="Fundly", page_icon="💼", layout="wide")
 
@@ -224,8 +225,8 @@ def status_badge(label, kind="invest"):
     return f'<span class="badge {cls}">{label}</span>' if label else "—"
 
 def linkedin_link(name):
-    url = f"https://www.linkedin.com/search/results/people/?keywords={requests.utils.quote(name)}"
-    return f'<a href="{url}" target="_blank" style="color:#0A66C2;text-decoration:none;font-size:12px;font-weight:500;">&#xf08c; {name}</a>'
+    url = f"https://www.linkedin.com/search/results/people/?keywords={quote(name)}"
+    return f'<a href="{url}" target="_blank" style="color:#0A66C2;text-decoration:none;font-size:12px;font-weight:500;">{name}</a>'
 
 # ══════════════════════════════════════════════════════════════════════════════
 # DEAL DASHBOARD
@@ -360,20 +361,6 @@ if page == "Deal Dashboard":
     # ── Table ─────────────────────────────────────────────────────────────────
     st.markdown(f"<div style='font-size:12px;color:#9CA3AF;margin-bottom:8px;'>{len(filtered)} companies</div>", unsafe_allow_html=True)
 
-    header_html = """
-    <table style="width:100%;border-collapse:collapse;font-family:'Sora',sans-serif;font-size:13px;">
-    <thead>
-    <tr style="background:#EBEBEA;border-bottom:1px solid #D4D4D2;">
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Company</th>
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Founders</th>
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Website</th>
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Stage</th>
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Investment Status</th>
-        <th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Discussion Status</th>
-    </tr>
-    </thead><tbody>
-    """
-
     rows_html = ""
     for i, row in filtered.iterrows():
         bg = "#F7F7F5" if i % 2 == 0 else "#F2F2F0"
@@ -387,21 +374,10 @@ if page == "Deal Dashboard":
         founders_html = "<br>".join([linkedin_link(n) for n in founder_names]) if founder_names else "—"
         url_html = f'<a href="{url}" target="_blank" style="color:#4F46E5;font-size:12px;font-weight:500;text-decoration:none;">{url.replace("https://","").replace("http://","").rstrip("/")}</a>' if url else "—"
         stage_html = f'<span class="badge badge-stage">{stage}</span>' if stage else "—"
-        rows_html += f"""
-        <tr style="border-bottom:1px solid #E8E8E6;background:{bg};">
-            <td style="padding:13px 14px;font-weight:600;color:#111827;">{company}</td>
-            <td style="padding:13px 14px;">{founders_html}</td>
-            <td style="padding:13px 14px;">{url_html}</td>
-            <td style="padding:13px 14px;">{stage_html}</td>
-            <td style="padding:13px 14px;">{status_badge(inv_status)}</td>
-            <td style="padding:13px 14px;">{status_badge(disc_status, 'discuss')}</td>
-        </tr>"""
+        rows_html += f"""<tr style="border-bottom:1px solid #E8E8E6;background:{bg};"><td style="padding:13px 14px;font-weight:600;color:#111827;">{company}</td><td style="padding:13px 14px;">{founders_html}</td><td style="padding:13px 14px;">{url_html}</td><td style="padding:13px 14px;">{stage_html}</td><td style="padding:13px 14px;">{status_badge(inv_status)}</td><td style="padding:13px 14px;">{status_badge(disc_status, 'discuss')}</td></tr>"""
 
-    st.markdown(
-        f'<div style="background:#F7F7F5;border:1px solid #D4D4D2;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">'
-        f'{header_html}{rows_html}</tbody></table></div>',
-        unsafe_allow_html=True
-    )
+    full_table = f"""<div style="background:#F7F7F5;border:1px solid #D4D4D2;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><table style="width:100%;border-collapse:collapse;font-family:'Sora',sans-serif;font-size:13px;"><thead><tr style="background:#EBEBEA;border-bottom:1px solid #D4D4D2;"><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Company</th><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Founders</th><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Website</th><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Stage</th><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Investment Status</th><th style="padding:11px 14px;text-align:left;font-size:10px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Discussion Status</th></tr></thead><tbody>{rows_html}</tbody></table></div>"""
+    st.markdown(full_table, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
